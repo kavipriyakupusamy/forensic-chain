@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Tamper Lab{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Tamper Lab</h1>
+    <p>Demo tools for your viva: simulate an attacker, then watch the system catch it.</p>
+  </div>
+</div>
+
+{% if valid %}
+<div class="banner ok">{{ icon('shield') }}<div><b>Chain currently VALID</b><span>Simulate an attack below, then open the Blockchain page.</span></div></div>
+{% else %}
+<div class="banner bad">{{ icon('alert') }}<div><b>Tampering detected at block #{{ bad_index }}</b><span>The system caught the edit. <a href="{{ url_for('chain') }}">See the broken block</a>. Use Reset to start fresh.</span></div></div>
+{% endif %}
+
+<div class="lab-grid">
+  <div class="card lab-card">
+    <div class="icon-big red">{{ icon('bug') }}</div>
+    <h3>1. Edit a block in the database</h3>
+    <p>Simulates an attacker changing a stored record directly in the DB file.</p>
+    <form method="post" action="{{ url_for('lab_tamper_block') }}">
+      <label for="block_index">Block number</label>
+      <select id="block_index" name="block_index">
+        {% for b in blocks %}{% if b['index'] > 0 %}<option value="{{ b['index'] }}">#{{ b['index'] }} · {{ b['evidence_id'] }} · {{ b['action'] }}</option>{% endif %}{% endfor %}
+      </select>
+      <button class="btn danger" type="submit" style="margin-top:16px" {% if blocks|length < 2 %}disabled{% endif %}>Tamper with block</button>
+    </form>
+  </div>
+
+  <div class="card lab-card">
+    <div class="icon-big amber">{{ icon('file') }}</div>
+    <h3>2. Modify an evidence file</h3>
+    <p>Appends bytes to the stored file so its SHA-256 no longer matches the sealed hash.</p>
+    <form method="post" action="{{ url_for('lab_tamper_file') }}">
+      <label for="evidence_id">Evidence</label>
+      <select id="evidence_id" name="evidence_id">
+        {% for e in evidence %}<option value="{{ e.evidence_id }}">{{ e.evidence_id }} · {{ e.filename }} ({{ e.state }})</option>{% endfor %}
+      </select>
+      <button class="btn danger" type="submit" style="margin-top:16px" {% if not evidence %}disabled{% endif %}>Tamper with file</button>
+    </form>
+  </div>
+
+  <div class="card lab-card">
+    <div class="icon-big blue">{{ icon('refresh') }}</div>
+    <h3>3. Reset demo data</h3>
+    <p>Deletes all evidence, uploaded files and blocks, then creates a new genesis block.</p>
+    <form method="post" action="{{ url_for('lab_reset') }}" onsubmit="return confirm('Delete all evidence and blocks?');">
+      <button class="btn" type="submit" style="margin-top:68px">Reset everything</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head"><h3>How to demo this</h3></div>
+  <ol style="margin:0;padding-left:20px;color:#c8d1ec;line-height:1.9;font-size:14px">
+    <li>Log in as <b>ravi</b>, register an evidence file, and transfer it to <b>kumar</b>.</li>
+    <li>Log in as <b>admin</b>, open this page, and tamper with a block. Open <b>Blockchain</b>: the block turns red.</li>
+    <li>Try a new transfer: it is blocked because the chain is invalid.</li>
+    <li>Reset, upload again, then tamper with the file and press <b>Run verification</b> on the evidence page.</li>
+  </ol>
+</div>
+{% endblock %}

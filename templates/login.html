@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Sign in{% endblock %}
+{% block auth %}
+<div class="auth">
+  <section class="auth-art">
+    <div class="logo" style="padding:0">
+      <div class="logo-mark">{{ icon('shield') }}</div>
+      <div class="logo-text">ChainTrace<small>Forensic Custody Ledger</small></div>
+    </div>
+    <h1>Digital evidence you can <em>prove</em> was never touched.</h1>
+    <p class="lead">Every handover of a piece of evidence is sealed into a tamper-evident blockchain, from the crime scene to the courtroom.</p>
+
+    <div class="features">
+      <div class="feature"><div class="ic">{{ icon('hash') }}</div><div><b>SHA-256 fingerprinting</b><span>Each evidence file is hashed on upload and re-checked on every handover.</span></div></div>
+      <div class="feature"><div class="ic">{{ icon('chain') }}</div><div><b>Immutable custody chain</b><span>Blocks are linked by hash. Edit one record and the whole chain breaks visibly.</span></div></div>
+      <div class="feature"><div class="ic">{{ icon('users') }}</div><div><b>Role-based accountability</b><span>Investigators, lab staff, analysts and court officers each leave a signed trail.</span></div></div>
+    </div>
+
+    <div class="mini-chain" aria-hidden="true">
+      <div class="mini-block">#0</div><div class="mini-link"></div>
+      <div class="mini-block">#1</div><div class="mini-link"></div>
+      <div class="mini-block">#2</div><div class="mini-link"></div>
+      <div class="mini-block">#3</div>
+    </div>
+  </section>
+
+  <section class="auth-form">
+    <div class="auth-panel">
+      {% include "_flashes.html" %}
+      <h2>Welcome back</h2>
+      <p>Sign in to manage the chain of custody.</p>
+      <form method="post" autocomplete="off">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autofocus>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+        <button class="btn primary block" type="submit" style="margin-top:22px">Sign in</button>
+      </form>
+
+      <div class="demo">
+        <h4>Demo accounts (click to fill)</h4>
+        <div class="demo-grid">
+          {% for u, info in demo_users.items() %}
+          <button type="button" class="demo-btn" data-user="{{ u }}" data-pass="{{ u }}123">
+            <b>{{ info.name }}</b><small>{{ info.role }}</small>
+          </button>
+          {% endfor %}
+        </div>
+        <p class="hint">Password pattern: username + 123</p>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.querySelectorAll('.demo-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.getElementById('username').value = b.dataset.user;
+      document.getElementById('password').value = b.dataset.pass;
+    });
+  });
+</script>
+{% endblock %}

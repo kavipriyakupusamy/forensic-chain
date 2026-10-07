@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Not found{% endblock %}
+{% block content %}
+<div class="card empty" style="margin-top:60px">
+  {{ icon('alert') }}
+  <h2>Page not found</h2>
+  <p style="margin:8px 0 18px">That record does not exist.</p>
+  <a class="btn primary" href="{{ url_for('dashboard') }}">Back to dashboard</a>
+</div>
+{% endblock %}
+{% block auth %}
+<div style="display:grid;place-items:center;min-height:100vh;text-align:center">
+  <div><h2>Page not found</h2><p style="margin:10px 0 18px;color:var(--muted)">That page does not exist.</p><a class="btn primary" href="{{ url_for('login') }}">Go to sign in</a></div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Transfer {{ ev.evidence_id }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Transfer custody</h1>
+    <p>{{ ev.evidence_id }} · {{ ev.filename }}</p>
+  </div>
+</div>
+
+<div class="card form-card">
+  <p class="hint" style="margin:0 0 6px">The file's SHA-256 is re-checked before this transfer is sealed. If it changed, the transfer is blocked.</p>
+  <form method="post">
+    <label for="action">Action</label>
+    <select id="action" name="action">
+      {% for key, text in ACTIONS.items() %}<option value="{{ key }}">{{ text }}</option>{% endfor %}
+    </select>
+
+    <label for="to_user">Hand over to</label>
+    <select id="to_user" name="to_user">
+      {% for u, name in users.items() %}<option value="{{ u }}">{{ name }}</option>{% endfor %}
+    </select>
+
+    <label for="notes">Notes</label>
+    <textarea id="notes" name="notes" rows="3" placeholder="Reason for transfer, storage location, lab reference…"></textarea>
+
+    <div class="actions" style="margin-top:22px">
+      <button class="btn primary" type="submit">{{ icon('send') }} Confirm and seal</button>
+      <a class="btn" href="{{ url_for('evidence_detail', evidence_id=ev.evidence_id) }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
