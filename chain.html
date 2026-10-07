@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Blockchain{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Blockchain explorer</h1>
+    <p>Every block stores the hash of the one before it. Change any record and the links break.</p>
+  </div>
+  <div class="actions"><a class="btn" href="{{ url_for('api_chain') }}" target="_blank">JSON view</a></div>
+</div>
+
+{% if valid %}
+<div class="banner ok">{{ icon('shield') }}<div><b>Chain is VALID</b><span>{{ blocks|length }} blocks · every hash and link verifies.</span></div></div>
+{% else %}
+<div class="banner bad">{{ icon('alert') }}<div><b>Chain is TAMPERED</b><span>First invalid block: #{{ bad_index }}. Everything from this block onward cannot be trusted.</span></div></div>
+{% endif %}
+
+<div class="chain-list">
+  {% for b in blocks %}
+    {% set is_bad = (not valid) and (b['index'] == bad_index) %}
+    {% if not loop.first %}
+    <div class="link-between {{ 'bad' if is_bad }}">{{ icon('down') }}</div>
+    {% endif %}
+    <div class="block-card {{ 'bad' if is_bad }} {{ 'genesis' if loop.first }}">
+      <div class="block-head">
+        <span class="block-no">#{{ b['index'] }}</span>
+        <span class="chip {{ 'bad' if is_bad else 'blue' }}">{{ b['action'] }}</span>
+        {% if loop.first %}<span class="chip ok nodot">Genesis</span>{% endif %}
+        {% if is_bad %}<span class="chip bad">Hash mismatch</span>{% endif %}
+        <span class="mono" style="margin-left:auto;color:var(--muted)">{{ b['timestamp'] }}</span>
+      </div>
+      <div class="block-grid">
+        <div><span>Evidence</span>
+          {% if b['evidence_id'] != 'GENESIS' %}<a href="{{ url_for('evidence_detail', evidence_id=b['evidence_id']) }}">{{ b['evidence_id'] }}</a>{% else %}GENESIS{% endif %}
+        </div>
+        <div><span>Details</span>{{ b['details'] or '—' }}</div>
+        <div><span>From</span>{{ b['from_user'] }}</div>
+        <div><span>To</span>{{ b['to_user'] }}</div>
+      </div>
+      <div class="hash-row"><span>Evidence hash</span><div class="hashbox">{{ b['evidence_hash'] }}</div></div>
+      <div class="hash-row"><span>Previous block hash</span><div class="hashbox">{{ b['previous_hash'] }}</div></div>
+      <div class="hash-row"><span>This block's hash</span><div class="hashbox" {% if is_bad %}style="border-color:rgba(248,113,113,.6)"{% endif %}>{{ b['hash'] }}</div></div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

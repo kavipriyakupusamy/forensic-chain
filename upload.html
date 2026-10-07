@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Register Evidence{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Register evidence</h1>
+    <p>Upload a file. Its SHA-256 fingerprint is computed and sealed into a new block.</p>
+  </div>
+</div>
+
+<div class="card form-card">
+  <form method="post" enctype="multipart/form-data">
+    <div class="dropzone" id="dropzone">
+      {{ icon('upload') }}
+      <strong>Drop the evidence file here or click to browse</strong>
+      <span>Any file type · up to 25 MB</span>
+      <input type="file" name="file" id="file" required>
+    </div>
+    <div id="file-name"></div>
+
+    <label for="description">Description / case notes</label>
+    <textarea id="description" name="description" rows="4" placeholder="e.g. Hard disk image seized from suspect's laptop, Case #2026-114"></textarea>
+    <p class="hint">You ({{ label(current_username) }}) become the first custodian of this evidence.</p>
+
+    <button class="btn primary" type="submit" style="margin-top:20px">{{ icon('shield') }} Seal on blockchain</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  var input = document.getElementById('file');
+  var zone = document.getElementById('dropzone');
+  input.addEventListener('change', function () {
+    document.getElementById('file-name').textContent = input.files.length ? 'Selected: ' + input.files[0].name : '';
+  });
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    zone.addEventListener(ev, function () { zone.classList.add('drag'); });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    zone.addEventListener(ev, function () { zone.classList.remove('drag'); });
+  });
+</script>
+{% endblock %}

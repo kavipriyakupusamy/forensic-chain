@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ ev.evidence_id }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ ev.evidence_id }} <span style="color:var(--muted);font-weight:500;font-size:18px">· {{ ev.filename }}</span></h1>
+    <p>Registered {{ ev.uploaded_at }} · {{ ev.size_bytes|size }}</p>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('verify', evidence_id=ev.evidence_id) }}">{{ icon('shield') }} Run verification</a>
+    <a class="btn" href="{{ url_for('download', evidence_id=ev.evidence_id) }}">{{ icon('download') }} Download</a>
+    {% if can_transfer %}
+    <a class="btn primary" href="{{ url_for('transfer', evidence_id=ev.evidence_id) }}">{{ icon('send') }} Transfer custody</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if state == 'intact' and valid %}
+<div class="banner ok">{{ icon('shield') }}<div><b>Integrity verified</b><span>The file hash matches the sealed original and the chain is intact.</span></div></div>
+{% else %}
+<div class="banner bad">{{ icon('alert') }}
+  <div><b>Integrity check FAILED</b>
+    <span>
+      {% if state == 'tampered' %}The evidence file no longer matches its sealed SHA-256 hash. {% elif state == 'missing' %}The evidence file is missing from storage. {% endif %}
+      {% if not valid %}The blockchain is tampered at block #{{ bad_index }}.{% endif %}
+    </span>
+  </div>
+</div>
+{% endif %}
+
+<div class="grid two">
+  <div>
+    <div class="card">
+      <div class="card-head"><h3>Evidence details</h3></div>
+      <dl class="kv">
+        <dt>Current custodian</dt><dd>{{ label(ev.current_holder) }}</dd>
+        <dt>Description</dt><dd>{{ ev.description or '—' }}</dd>
+        <dt>File status</dt>
+        <dd>{% if state == 'intact' %}<span class="chip ok">Intact</span>{% elif state == 'tampered' %}<span class="chip bad">Tampered</span>{% else %}<span class="chip warn">Missing</span>{% endif %}</dd>
+        <dt>Sealed SHA-256</dt>
+        <dd><div class="hashbox">{{ ev.sha256 }}<button class="btn sm copy" data-copy="{{ ev.sha256 }}">Copy</button></div></dd>
+        {% if state == 'tampered' %}
+        <dt>Current SHA-256</dt>
+        <dd><div class="hashbox" style="border-color:rgba(248,113,113,.6);color:#fecaca">{{ current_hash }}</div></dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Chain of custody</h3><span class="chip blue nodot">{{ history|length }} records</span></div>
+    <div class="timeline">
+      {% for b in history %}
+      <div class="tl-item {{ 'bad' if not valid and b['index'] == bad_index }}">
+        <div class="tl-box">
+          <div class="tl-top">
+            <span class="chip blue">{{ b['action'] }}</span>
+            <span class="mono" style="color:var(--muted)">block #{{ b['index'] }}</span>
+          </div>
+          <div class="tl-flow">{{ b['from_user'] }}<span class="arrow">→</span>{{ b['to_user'] }}</div>
+          <div class="tl-meta">{{ b['timestamp'] }}{% if b['details'] %} · {{ b['details'] }}{% endif %}</div>
+          <div class="mono" style="color:var(--muted);margin-top:6px">hash {{ b['hash']|short(10) }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

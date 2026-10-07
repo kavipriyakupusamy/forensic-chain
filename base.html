@@ -1,0 +1,59 @@
+{% from "_icons.html" import icon %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ChainTrace{% endblock %} · Forensic Chain of Custody</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if current_user %}
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">{{ icon('shield') }}</div>
+      <div class="logo-text">ChainTrace<small>Forensic Custody Ledger</small></div>
+    </div>
+    <nav class="nav">
+      {% set ep = request.endpoint %}
+      <div class="nav-label">Workspace</div>
+      <a href="{{ url_for('dashboard') }}" class="{{ 'active' if ep == 'dashboard' }}">{{ icon('grid') }} Dashboard</a>
+      <a href="{{ url_for('upload') }}" class="{{ 'active' if ep == 'upload' }}">{{ icon('upload') }} Register Evidence</a>
+      <a href="{{ url_for('chain') }}" class="{{ 'active' if ep == 'chain' }}">{{ icon('chain') }} Blockchain</a>
+      {% if current_user.role == 'Administrator' %}
+      <div class="nav-label">Admin</div>
+      <a href="{{ url_for('lab') }}" class="{{ 'active' if ep and ep.startswith('lab') }}">{{ icon('flask') }} Tamper Lab</a>
+      {% endif %}
+    </nav>
+    <div class="user-box">
+      <div class="avatar">{{ current_user.name[0] }}</div>
+      <div class="who">{{ current_user.name }}<small>{{ current_user.role }}</small></div>
+      <a class="logout" href="{{ url_for('logout') }}" title="Sign out">{{ icon('logout') }}</a>
+    </div>
+  </aside>
+  <main class="content">
+    {% include "_flashes.html" %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+  {% block auth %}{% endblock %}
+{% endif %}
+<script>
+  // copy-to-clipboard buttons
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy]');
+    if (!b) return;
+    navigator.clipboard.writeText(b.getAttribute('data-copy')).then(function () {
+      var old = b.textContent; b.textContent = 'Copied!';
+      setTimeout(function () { b.textContent = old; }, 1200);
+    });
+  });
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
